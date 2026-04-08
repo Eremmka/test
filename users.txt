@@ -1,2 +1,3 @@
 qwe@index.com|qwe|female|$2y$10$rgonLXMrkoh3obQb92g2EucFce.UhuY8JNd7xUs4GOlygQKkQyINi
 123@123.com|123|female|$2y$10$.n39v9GYHVnXgsCjTNwPpu2xZ71Gkt9ySujYFECGT7rb5F7g67GG2
+tuntunsaur@example.com|Тун Тун Сахур|other|$2y$10$532wQDsn6CdE64AtGFb3hODVq.vbv/s30F/5tTLHNoO0yWOMoJu8a
