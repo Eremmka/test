@@ -11,6 +11,28 @@ $subfolderResults = [];
 $jpgList = [];
 
 $dir1 = 'test';
+
+function deleteDirectoryRecursive($dir) {
+    if (!file_exists($dir)) {
+        return false;
+    }
+
+    if (!is_dir($dir)) {
+        return unlink($dir);
+    }
+
+    $items = array_diff(scandir($dir), ['.', '..']);
+    foreach ($items as $item) {
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+        if (!deleteDirectoryRecursive($path)) {
+            return false;
+        }
+    }
+
+    return rmdir($dir);
+}
+
+
 if (!file_exists($dir1)) {
     if (mkdir($dir1)) {
         $results[] = ['status' => 'success', 'text' => "Папка '$dir1' создана"];
@@ -33,10 +55,10 @@ if (file_exists($dir1)) {
 }
 
 if (file_exists($newDir)) {
-    if (@rmdir($newDir)) {
+    if (deleteDirectoryRecursive($newDir)) {
         $results[] = ['status' => 'success', 'text' => "Папка '$newDir' удалена"];
     } else {
-        $results[] = ['status' => 'error', 'text' => "Ошибка удаления папки '$newDir' (возможно, не пуста)"];
+        $results[] = ['status' => 'error', 'text' => "Ошибка удаления папки '$newDir'"];
     }
 } else {
     $results[] = ['status' => 'error', 'text' => "Папка '$newDir' не существует"];
