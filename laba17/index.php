@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+?>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -7,10 +11,10 @@
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-    <?php include 'includes/header.php'; ?>
+    <?php include __DIR__ . '/includes/header.php'; ?>
     <main>
         <h1>Добро пожаловать!</h1>
     </main>
-    <?php include 'includes/footer.php'; ?>
+<?php include __DIR__ . '/includes/footer.php'; ?>
 </body>
 </html>
