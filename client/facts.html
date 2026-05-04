@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Факты о животных</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 40px auto; padding: 15px; }
+        .fact-box { background: #f9f9f9; border-radius: 8px; padding: 20px; margin: 20px 0; font-size: 1.2em; }
+        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; background: #4a76a8; color: white; font-size: 1em; margin-right: 10px; }
+        button:hover { background: #3b5d82; }
+        .delete-btn { background: #c0392b; font-size: 0.9em; padding: 4px 10px; }
+        .favorites ul { list-style: none; padding: 0; }
+        .favorites li { padding: 10px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
+        select { padding: 8px; font-size: 1em; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Факты о животных</h1>
+    <label for="animal-type">Животное: </label>
+    <select id="animal-type">
+        <option value="cat">Кошка</option>
+        <option value="dog">Собака</option>
+    </select>
+    <button id="get-fact-btn">Узнать факт</button>
+    <div id="fact-container" class="fact-box">Выберите животное и нажмите кнопку</div>
+    <button id="save-fact-btn" onclick="saveFact()" style="display:none;">❤️ Сохранить факт</button>
+
+    <div class="favorites">
+        <h2>Избранные факты</h2>
+        <ul id="favorites-list"></ul>
+    </div>
+
+    <script>
+        let currentFact = null;
+        // Используем наше API фактов (прямой HTTP, без прокси)
+        const FACTS_API = '/api/public/animal_facts.php';
+
+        async function getFact() {
+            const type = document.getElementById('animal-type').value;
+            const url = FACTS_API + '?type=' + type;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                currentFact = data.fact;
+                document.getElementById('fact-container').textContent = currentFact;
+                document.getElementById('save-fact-btn').style.display = 'inline-block';
+            } catch (e) {
+                document.getElementById('fact-container').textContent = 'Ошибка загрузки факта';
+                console.error(e);
+            }
+        }
+
+        function saveFact() {
+            if (!currentFact) return;
+            let favs = JSON.parse(localStorage.getItem('animalFacts') || '[]');
+            if (!favs.includes(currentFact)) {
+                favs.push(currentFact);
+                localStorage.setItem('animalFacts', JSON.stringify(favs));
+                renderFavorites();
+            }
+        }
+
+        function removeFact(index) {
+            let favs = JSON.parse(localStorage.getItem('animalFacts') || '[]');
+            favs.splice(index, 1);
+            localStorage.setItem('animalFacts', JSON.stringify(favs));
+            renderFavorites();
+        }
+
+        function renderFavorites() {
+            const favs = JSON.parse(localStorage.getItem('animalFacts') || '[]');
+            const list = document.getElementById('favorites-list');
+            list.innerHTML = '';
+            favs.forEach((fact, i) => {
+                const li = document.createElement('li');
+                li.innerHTML = `${fact} <button class="delete-btn" onclick="removeFact(${i})">Удалить</button>`;
+                list.appendChild(li);
+            });
+        }
+
+        document.getElementById('get-fact-btn').addEventListener('click', getFact);
+        // загрузка сохранённых при открытии страницы
+        renderFavorites();
+    </script>
+</body>
+</html>

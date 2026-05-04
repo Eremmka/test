@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Совет дня</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 40px auto; padding: 15px; }
+        .advice-box { background: #f9f9f9; border-radius: 8px; padding: 20px; margin: 20px 0; font-size: 1.2em; }
+        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; background: #4a76a8; color: white; font-size: 1em; margin-right: 10px; }
+        button:hover { background: #3b5d82; }
+        .delete-btn { background: #c0392b; font-size: 0.9em; padding: 4px 10px; }
+        .favorites ul { list-style: none; padding: 0; }
+        .favorites li { padding: 10px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <h1>Совет дня</h1>
+    <button id="get-advice-btn">Получить совет</button>
+    <div id="advice-container" class="advice-box">Нажмите кнопку</div>
+    <button id="save-btn" onclick="saveAdvice()" style="display:none;">❤️ Сохранить в избранное</button>
+
+    <div class="favorites">
+        <h2>Избранные советы</h2>
+        <ul id="favorites-list"></ul>
+    </div>
+
+    <script>
+        let currentAdvice = null;
+        const PROXY_URL = 'proxy.php?url='; // путь к нашему прокси
+
+        async function getAdvice() {
+            const apiUrl = 'https://api.adviceslip.com/advice';
+            // Добавляем timestamp, чтобы избежать кеширования браузером
+            const urlWithTs = apiUrl + '?_=' + new Date().getTime();
+            const proxyRequest = PROXY_URL + encodeURIComponent(urlWithTs);
+            try {
+                const res = await fetch(proxyRequest);
+                const data = await res.json();
+                currentAdvice = data.slip.advice;
+                document.getElementById('advice-container').textContent = `"${currentAdvice}"`;
+                document.getElementById('save-btn').style.display = 'inline-block';
+            } catch (e) {
+                document.getElementById('advice-container').textContent = 'Ошибка загрузки совета';
+                console.error(e);
+            }
+        }
+
+        function saveAdvice() {
+            if (!currentAdvice) return;
+            let favs = JSON.parse(localStorage.getItem('advices') || '[]');
+            if (!favs.includes(currentAdvice)) {
+                favs.push(currentAdvice);
+                localStorage.setItem('advices', JSON.stringify(favs));
+                renderFavorites();
+            }
+        }
+
+        function removeAdvice(index) {
+            let favs = JSON.parse(localStorage.getItem('advices') || '[]');
+            favs.splice(index, 1);
+            localStorage.setItem('advices', JSON.stringify(favs));
+            renderFavorites();
+        }
+
+        function renderFavorites() {
+            const favs = JSON.parse(localStorage.getItem('advices') || '[]');
+            const list = document.getElementById('favorites-list');
+            list.innerHTML = '';
+            favs.forEach((advice, i) => {
+                const li = document.createElement('li');
+                li.innerHTML = `${advice} <button class="delete-btn" onclick="removeAdvice(${i})">Удалить</button>`;
+                list.appendChild(li);
+            });
+        }
+
+        document.getElementById('get-advice-btn').addEventListener('click', getAdvice);
+        renderFavorites(); // отображаем сохранённые при загрузке
+    </script>
+</body>
+</html>
